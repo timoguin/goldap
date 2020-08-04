@@ -1,0 +1,96 @@
+// // Clone of the ldap.Entry struct so we can do type conversion and add new methods to
+// // this type via receivers
+// type Entry struct {
+// 	// DN is the distinguished name of the entry
+// 	DN string
+// 	// Attributes are the returned attributes for the entry
+// 	Attributes []*ldap.EntryAttribute
+// }
+
+type SingleValueAttribute map[string]string
+type MultiValueAttribute map[string][]string
+
+// // A smarter JSON serializer that converts single-element lists into strings
+// func (e *JSONEntry) Dump(indent string) {
+// 	numAttributes := len(e.Attributes)
+// 	attrs := e.Attributes
+// 	for i := 0; i < numAttributes; i++ {
+// 		if attrs[i]
+//
+// 		entry := searchResult.Entries[i]
+// 		jsonEntry := EntryToSerializable(entry)
+// 		jsonEntries = append(jsonEntries, jsonEntry)
+// 	}
+//
+// }
+
+		numEntries := len(searchResult.Entries)
+
+		// TODO: Figure out how to convert single-value attributes to a string and list
+		// multi-value as []string
+
+		// Iterate through the response elements and reshape them a bit
+		var jsonEntries []JSONEntry
+		for i := 0; i < numEntries; i++ {
+			entry := searchResult.Entries[i]
+			jsonEntry := EntryToSerializable(entry)
+			jsonEntries = append(jsonEntries, jsonEntry)
+		}
+
+func EntryToSerializable(e *ldap.Entry) JSONEntry {
+	jsonEntry := JSONEntry{
+		DN:         e.DN,
+		Attributes: make(map[string][]string),
+
+		// singlAttrs: make(map[string]string),
+		// multiAttrs: make(map[string][]string),
+
+		// Example attribute:
+		//
+		// {
+		//   "Name": "objectClass",
+		//   "Values": [
+		//     "top",
+		//     "person",
+		//     "organizationalPerson",
+		//     "posixAccount"
+		//   ],
+		//   "ByteValues": [
+		//     "dG9w",
+		//     "cGVyc29u",
+		//     "b3JnYW5pemF0aW9uYWxQZXJzb24=",
+		//     "cG9zaXhBY2NvdW50"
+		//   ]
+		// }
+		//
+		// Convert original attribute to the single JSONEntry struct
+	}
+
+	numAttributes := len(e.Attributes)
+	for i := 0; i < numAttributes; i++ {
+		attr := e.Attributes[i]
+		jsonEntry.Attributes[strings.ToLower(attr.Name)] = attr.Values
+		// if len(attr.Values) == 1 {
+		// 	jsonEntry.singlAttrs[attr.Name] = attr.Values[0]
+		// } else {
+		// 	jsonEntry.multiAttrs[attr.Name] = attr.Values
+		// }
+	}
+
+	return jsonEntry
+}
+
+type JSONEntry struct {
+	DN         string              "json:dn"
+	Attributes map[string][]string "json:attributes"
+
+	// Example serialized entry:
+	//
+	// {
+	//   "dn": "cn=foo-user,ou=Users,dc=foo...",
+	//   "attributes": {
+	//     "foo-attribute": ["value1", "value2"],
+	//     "TODO-single-value": "value-single"
+	//   }
+	// }
+}
