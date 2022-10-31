@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/go-ldap/ldap/v3"
@@ -25,7 +26,7 @@ var SearchHelp = map[string]string{
 | to be more readable, while the familiar names from ldapsearch are supported as aliases. |
 | The filter must be passed via the --filter flag, and attributes must be passed via one  |
 | or more --attribute flags.                                                              |
-|                                                                                         |  
+|                                                                                         |
 ===========================================================================================
 
 `,
@@ -132,7 +133,13 @@ func SearchCmdRun(cmd *cobra.Command, args []string) {
 
 	// Reconnect with TLS
 	if viper.GetBool("start-tls") {
-		err = session.StartTLS(&tls.Config{InsecureSkipVerify: true})
+		url, err := url.Parse(ldapURI)
+		if err != nil {
+			Logger.Fatalw("Failed to parse LDAP URI", "err", err)
+			os.Exit(1)
+		}
+
+		err = session.StartTLS(&tls.Config{ServerName: url.Hostname()})
 		if err != nil {
 			Logger.Fatalw("Failed to connect with TLS", "err", err)
 			os.Exit(1)

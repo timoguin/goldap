@@ -1,7 +1,7 @@
 # Makefile to help with builds
 #
 
-VERSION      := 0.0.1
+VERSION      := 0.0.2
 GIT_COMMIT   := $(shell git rev-parse HEAD)
 GO_VERSION   := $(shell go version | sed 's/go version //')
 BIN_NAME     := goldap

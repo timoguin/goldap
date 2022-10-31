@@ -1,0 +1,28 @@
+# pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: no-commit-to-branch
+      - id: trailing-whitespace
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+      - id: go-build
+      - id: go-mod-tidy
+      - id: go-mod-vendor
+      # Enable these later, once a good dependency checker/installer is in the Makefile
+      # and dependencies are defined in the README.
+      #
+      # - id: go-lint
+      # - id: go-imports
+      # - id: go-cyclo
+      # - id: go-critic

@@ -35,12 +35,12 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Sprintf("Error parsing config file %s: %s", viper.ConfigFileUsed(), err)
+		fmt.Printf("Error parsing config file %s: %s", viper.ConfigFileUsed(), err)
 	}
 
 	// Bind all command flags to Viper config
 	if err := viper.BindPFlags(rootCmd.Flags()); err != nil {
-		fmt.Sprintf("Error binding config flags with viper: %s", err)
+		fmt.Printf("Error binding config flags with viper: %s", err)
 		os.Exit(1)
 	}
 }
