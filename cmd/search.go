@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"crypto/tls"
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/go-ldap/ldap/v3"
@@ -96,7 +98,6 @@ type LDAPNewSearchRequestInput struct {
 
 // Execute the search
 func SearchCmdRun(cmd *cobra.Command, args []string) {
-	Logger.Debug("test in search command")
 
 	// Prepare input for search request
 	searchInput := LDAPNewSearchRequestInput{
@@ -129,6 +130,15 @@ func SearchCmdRun(cmd *cobra.Command, args []string) {
 	}
 	defer session.Close()
 
+	// Reconnect with TLS
+	if viper.GetBool("start-tls") {
+		err = session.StartTLS(&tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			Logger.Fatalw("Failed to connect with TLS", "err", err)
+			os.Exit(1)
+		}
+	}
+
 	// Authenticate the client via Simple BIND
 	bindDN = viper.GetString("bind-dn")
 	password = viper.GetString("password")
@@ -139,15 +149,6 @@ func SearchCmdRun(cmd *cobra.Command, args []string) {
 			"err", err,
 		)
 		os.Exit(1)
-	}
-
-	// Reconnect with TLS
-	if viper.GetBool("start-tls") {
-		err = session.StartTLS(&tls.Config{InsecureSkipVerify: true})
-		if err != nil {
-			Logger.Fatalw("Failed to connect with TLS", "err", err)
-			os.Exit(1)
-		}
 	}
 
 	// Prepare the LDAP search inputs
@@ -174,16 +175,13 @@ func SearchCmdRun(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// Print search results
-	Logger.Infow("Performed search", "entries", searchResult.Entries)
-
-	// // Marshal JSON and print
-	// var jsonData []byte
-	// jsonData, err = json.Marshal(searchResult.Entries)
-	// if err != nil {
-	// 	logger.Fatalw("Failed to marshal results to JSON", "err", err)
-	// }
-	// fmt.Println(string(jsonData))
+	// Marshal JSON and print
+	var jsonData []byte
+	jsonData, err = json.Marshal(searchResult.Entries)
+	if err != nil {
+		Logger.Fatalw("Failed to marshal results to JSON", "err", err)
+	}
+	fmt.Println(string(jsonData))
 }
 
 // Initialize the search command: parse CLI flags and other configuration
