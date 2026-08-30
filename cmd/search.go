@@ -210,9 +210,15 @@ func init() {
 	searchCmd.Flags().IntVarP(&pagingSize, "paging-size", "p", 100, "Number of records to return with pagination")
 	searchCmd.Flags().BoolVarP(&startTLS, "start-tls", "Z", false, "Connect using TLS")
 
-	// Bind all command flags to Viper config
+	// Bind all command flags to Viper config. Both the local flags and the
+	// persistent flags (ldap-uri, bind-dn, password) must be bound, otherwise
+	// viper.GetString never sees the -H/-D/-w values and reads them back empty.
 	if err := viper.BindPFlags(searchCmd.Flags()); err != nil {
 		Logger.Fatalf("Error binding config flags with viper: %s", err)
+		os.Exit(1)
+	}
+	if err := viper.BindPFlags(searchCmd.PersistentFlags()); err != nil {
+		Logger.Fatalf("Error binding persistent config flags with viper: %s", err)
 		os.Exit(1)
 	}
 }
